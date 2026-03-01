@@ -1,0 +1,278 @@
+/* .home-page {
+  padding: 24px;
+  color: #121212;
+  overflow-y: auto;
+  height: 100%;
+}
+
+
+.home-page h2 {
+  font-size: 1.8rem;
+  margin: 20px 0 10px;
+  color: #f0f0f0;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 4px;
+}
+
+.playlists-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 12px;
+}
+.playlist-card {
+  background-color: rgba(255, 255, 255, 0.04);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 16px; /* from the second definition */
+  /*
+}
+
+
+.playlist-card h3 {
+  font-size: 1.4rem;
+  color: #ffffff;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+/* Optional: If you want horizontal scrolling for some sections 
+.songlist-scrollable {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding-bottom: 8px;
+  scroll-snap-type: x mandatory;
+}
+
+.songlist-scrollable::-webkit-scrollbar {
+  height: 6px;
+}
+
+.songlist-scrollable::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 6px;
+}
+
+.home-page h2 {
+  margin-top: 24px;
+  font-size: 1.6rem;
+}
+.playlist-card {
+  margin-bottom: 16px;
+} */
+
+
+
+
+/* General Page Styling */
+
+
+
+
+.home-page {
+  padding: 24px;
+  color: white;
+  overflow-y: auto;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Headings */
+.home-page h2,
+.section h2 {
+  font-size: 1.8rem;
+  margin: 20px 0 10px;
+  color: #f0f0f0;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 4px;
+}
+
+/* Section Wrappers */
+.section-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  padding-bottom: 40px;
+}
+
+.section {
+  position: relative;
+  z-index: 1;
+}
+
+/* Scrollable horizontal song list */
+.songlist-scrollable {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding-bottom: 8px;
+  scroll-snap-type: x mandatory;
+}
+
+.songlist-scrollable::-webkit-scrollbar {
+  height: 6px;
+}
+.songlist-scrollable::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 6px;
+}
+
+/* Song Card Styles */
+.song-card {
+  min-width: 160px;
+  flex-shrink: 0;
+  background-color: rgba(255, 255, 255, 0.04);
+  padding: 12px;
+  border-radius: 10px;
+  color: white;
+  text-align: center;
+}
+
+/* Playlist Section */
+.playlists-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 20px;
+  padding: 0 8px;
+}
+.empty-playlists {
+  text-align: center;
+  padding: 60px 20px;
+  color: #ddd;
+}
+
+.empty-playlists-icon {
+  width: 140px;
+  height: auto;
+  opacity: 0.85;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
+}
+
+.empty-playlists h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.empty-playlists p {
+  font-size: 1.1rem;
+  opacity: 0.85;
+  line-height: 1.5;
+}
+
+
+/* Playlist Card Styling */
+.playlist-card {
+  background-color: rgba(223, 50, 50, 0.04);
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+  max-width: 600px;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+  transition: transform 0.2s ease;
+}
+
+.playlist-card:hover {
+  transform: scale(1.03);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.playlist-card h3 {
+  font-size: 1.1rem;
+  color: #ffffff;
+  margin-bottom: 10px;
+  text-align: center;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Empty State & Loading */
+.loading,
+.no-songs {
+  text-align: center;
+  padding: 40px;
+  color: #a0a0a0;
+}
+
+.no-songs h2 {
+  margin-bottom: 15px;
+}
+
+
+@media (max-width: 600px) {
+  .playlist-card {
+    width: 100%;
+  }
+
+  .song-card {
+    min-width: 140px;
+  }
+
+  .home-page h2 {
+    font-size: 1.4rem;
+  }
+}
+
+
+/* Horizontal scroll for each playlist */
+.playlist-songlist-scrollable {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding-bottom: 8px;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+}
+
+.playlist-songlist-scrollable::-webkit-scrollbar {
+  height: 6px;
+}
+.playlist-songlist-scrollable::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 6px;
+}
+
+.section-wrapper {
+  padding: 24px;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  background-color: transparent;
+  align-items: center;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: white;
+  text-align: center;
+}
+
+.section-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.playlist-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.playlist-songlist-scrollable {
+  max-height: 250px;
+  overflow-y: auto;
+}

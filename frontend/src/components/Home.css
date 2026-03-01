@@ -1,0 +1,112 @@
+/* Home.css
+
+@import url('https://fonts.googleapis.com/css2?family=Rock+Salt&display=swap');
+/* Reset page defaults */
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.home {
+  height: 100vh;
+  width: 100vw;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.content {
+  text-align: center;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 40px;
+  border-radius: 10px;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  font-family: 'Rock Salt', cursive; /* if you're importing a custom font }
+
+
+.tagline {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.gradient-button {
+  background: linear-gradient(to right, #f97316, #fb923c);
+  border: none;
+  padding: 10px 20px;
+  color: white;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 1rem;
+} 
+  */
+
+
+  /* .orb-container {
+  position: absolute;   /* absolute to layer behind content */
+  /* top: 0;
+  left: 0;
+  width: 100%;
+  height: 600px;        /* match desired height */
+  /* z-index: 0; */
+  /* pointer-events: none; optional: allow clicks to pass through */
+/* } */ 
+
+.button-container {
+  display: flex;
+  gap: 0.5rem; /* spacing between buttons */
+  z-index: 1;
+  margin-top: 1rem;
+}
+
+
+.home-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.home-title {
+  z-index: 1;
+  font-weight: 300;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.get-started-button {
+  z-index: 1;
+  padding: 0.5rem 1.5rem;
+  background:#028ccc ;
+  border: transparent ;
+  color: #ffffff; /* ORANGE TEXT */
+  border-radius: 999px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.get-started-button2 {
+  z-index: 1;
+  padding: 0.5rem 1.5rem;
+  background: transparent;
+  border: 1px solid #909090 ;
+  color: #ffffff;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+

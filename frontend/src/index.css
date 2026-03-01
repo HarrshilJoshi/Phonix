@@ -1,0 +1,97 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Rock+Salt&display=swap');
+/* Reset page defaults */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  /* overflow: hidden; */
+   overflow: auto;
+  background: #121212;
+  z-index: 0;
+}
+
+.home {
+  height: 100vh;
+  width: 100vw;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: black;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 8%;
+  padding-top: 10%;
+  max-width: 600px;
+}
+
+.title {
+  font-family: 'Rock Salt', cursive;
+  color: white;
+  font-size: 2.8rem;
+  margin-bottom: 10px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.tagline {
+  color: #ffeaa7;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  font-weight: 500;
+  margin-bottom: 40px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.gradient-button {
+  background: linear-gradient(135deg, #fca311);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.gradient-button:hover {
+  opacity: 0.9;
+}
+
+/* Responsive layout for small screens */
+@media (max-width: 768px) {
+  .home {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .content {
+    margin: 0;
+    padding-top: 0;
+    align-items: center;
+  }
+
+  .title {
+    font-size: 2.2rem;
+  }
+
+  .tagline {
+    font-size: 1.1rem;
+  }
+}

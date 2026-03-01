@@ -1,0 +1,136 @@
+.search-container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 16px 20px 20px;
+  margin: 0 auto 20px auto;
+  overflow-x: hidden;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(13, 10, 24, 0.98);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(82, 39, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.search-form {
+  display: flex;
+  gap: 14px;
+  margin: 0 auto;
+  color: aliceblue;
+  width: 100%;
+  max-width: 100%;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 120px;
+  padding: 14px 20px;
+  border: 2px solid rgba(82, 39, 255, 0.3);
+  border-radius: 100px;
+  background-color: #271E37;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  box-sizing: border-box;
+  min-height: 48px;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.search-button {
+  padding: 14px 22px;
+  background: linear-gradient(135deg, #5227FF, #7b5cff);
+  color: white;
+  border: none;
+  border-radius: 100px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+  flex-shrink: 0;
+  min-height: 48px;
+}
+
+.search-button:hover {
+  transform: scale(1.02);
+}
+
+.search-button:hover {
+  filter: brightness(1.1);
+}
+
+.search-button:active {
+  transform: scale(0.98);
+}
+
+.load-more {
+  display: block;
+  margin: 12px auto 24px;
+  padding: 10px 20px;
+  background-color: #5227FF;
+  color: white;
+  border: none;
+  border-radius: 100px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.load-more:hover {
+  background-color: #6b42ff;
+}
+
+/* 📱 Mobile: full width, touch-friendly, always visible */
+@media (max-width: 768px) {
+  .search-container {
+    padding: 12px 16px 16px;
+    margin-bottom: 12px;
+  }
+
+  .search-form {
+    max-width: 100%;
+    gap: 10px;
+  }
+
+  .search-input {
+    padding: 14px 18px;
+    font-size: 16px;
+    min-height: 48px;
+  }
+
+  .search-button {
+    padding: 14px 18px;
+    font-size: 15px;
+    min-height: 48px;
+  }
+
+  .load-more {
+    width: calc(100% - 24px);
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-container {
+    padding: 0 10px;
+  }
+
+  .search-form {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .search-input {
+    min-width: 0;
+  }
+}

@@ -1,0 +1,95 @@
+/* SideBar.css */
+
+
+/* 
+@media (max-width: 768px) {
+  .sidebar {
+    width: 0%; 
+  }
+} */
+.sidebar {
+  width: 16%;
+  background: #000;
+  color: white;
+  height: 100vh;
+  padding: 20px;
+  transition: all 0.3s ease;
+  transform: translateX(0); /* Smoothly animate both width and transform */
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 0; /* closed state */
+    padding: 0; /* remove inside padding when closed */
+    overflow: hidden; /* hide text when closed */
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%); /* Don't slide, only width changes */
+    z-index: 1000;
+  }
+
+  .sidebar.open {
+    width: 40%; /* or 25%, but 70% is more touch-friendly */
+    padding: 20px;
+    transform: translateX(0);
+  }
+}
+
+
+
+@media (min-width: 769px) {
+ 
+}
+
+
+
+
+
+
+.sidebar-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.sidebar-btn {
+  height: 50px;
+  width: 90%;
+  color: white;
+  font-size: 16px;
+  text-align: left;
+  padding-left: 10px;
+  line-height: 50px;
+  cursor: pointer;
+  border-radius: 8px;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  transition: all 0.5s ease;
+}
+
+.sidebar-btn:hover {
+  background-color: #5227FF;
+}
+
+.sidebar-secondary {
+  list-style-type: none;
+  padding: 0;
+  position: relative;
+  top: 50px;
+}
+
+.sidebar-small-btn {
+  width: 230px;
+  font-size: 13px;
+  font-weight: bold;
+  height: 40px;
+}
