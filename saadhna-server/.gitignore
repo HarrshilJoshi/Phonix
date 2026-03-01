@@ -1,0 +1,6 @@
+node_modules
+songs
+compiled
+*.log
+.env
+dlist.json
