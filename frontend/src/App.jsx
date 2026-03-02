@@ -52,7 +52,7 @@ function App() {
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<SignIn />} />
-      <Route path="/signup" element={<SignUp />} />
+     
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
 
