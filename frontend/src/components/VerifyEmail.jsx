@@ -48,7 +48,7 @@
 import { auth } from "../firebase";
 import { sendEmailVerification, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import "../Auth.css";
+// import "../Auth.css";
 
 const VerifyEmail = () => {
   const navigate = useNavigate();
