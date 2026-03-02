@@ -40,7 +40,7 @@
 
 import { Routes, Route, Navigate } from 'react-router-dom';
 import SignIn from './components/SignIn';
-import SignUp from './components/SignUp';
+// import SignUp from './components/SignUp';
 import VerifyEmail from './components/VerifyEmail';
 import ForgotPassword from './components/ForgotPassword';
 import Player from './components/Player';

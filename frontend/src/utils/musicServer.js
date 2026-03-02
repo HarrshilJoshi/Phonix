@@ -1,7 +1,7 @@
 
 
 
-const SERVER_URL = "http://localhost:3000"; // Update with your server port
+const SERVER_URL = "https://phonix-x7de.onrender.com/"; // Update with your server port
 
 export const prepareAndPlaySong = async (trackId) => {
   try {

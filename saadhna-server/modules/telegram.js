@@ -8,7 +8,12 @@ bot.help((ctx) => ctx.reply('Send me a sticker'))
 bot.on('sticker', (ctx) => ctx.reply('👍'))
 bot.hears('hi', (ctx) => ctx.reply('Hey there'))
 // bot will send all files inside modules folder to the group chat with id -835379521
-bot.launch()
+try {
+  bot.launch();
+  console.log('Telegram bot launched');
+} catch (err) {
+  console.error('Telegram bot failed:', err.message);
+}
 async function saveFile(file_path) {
     // send file to group chat and return the file id
     var file_id = await bot.telegram.sendDocument(process.env.GROUP_ID, { source: file_path}).then((result) => {
