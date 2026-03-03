@@ -17,6 +17,8 @@ const Playerbar = ({
   showLyrics,
   onToggleLyrics,
   lyricsText,
+  syncedLyrics,
+  lyricsMode
 }) => {
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -24,7 +26,32 @@ const Playerbar = ({
   const progressContainerRef = useRef(null);
 
   const audio = persistentAudioRef?.current;
+  const [activeLyricIndex, setActiveLyricIndex] = useState(-1);
 
+// Sync highlight on timeupdate
+useEffect(() => {
+  if (lyricsMode !== "synced" || !syncedLyrics?.length || !audio) return;
+
+  const handleTimeUpdate = () => {
+    const current = audio.currentTime;
+    let activeIndex = -1;
+    for (let i = 0; i < syncedLyrics.length; i++) {
+      if (syncedLyrics[i].time <= current) activeIndex = i;
+      else break;
+    }
+    setActiveLyricIndex(activeIndex);
+  };
+
+  audio.addEventListener("timeupdate", handleTimeUpdate);
+  return () => audio.removeEventListener("timeupdate", handleTimeUpdate);
+}, [lyricsMode, syncedLyrics, audio]);
+
+// Auto scroll active line into center
+useEffect(() => {
+  if (activeLyricIndex < 0) return;
+  document.querySelector(".lyric-line.active")
+    ?.scrollIntoView({ behavior: "smooth", block: "center" });
+}, [activeLyricIndex]);
   // Progress and auto-next logic
   useEffect(() => {
     if (!audio) return;
@@ -96,20 +123,40 @@ const Playerbar = ({
   return (
     <div className="playerbar-wrapper">
       {/* Lyrics box directly above the bar, inside same fixed container */}
-      {showLyrics && (
-        <div className="lyrics-box-above-player">
-          <div className="lyrics-box-inner">
-            <h4 className="lyrics-box-title">Lyrics</h4>
-            <div className="lyrics-box-content">
-              {lyricsText !== null ? (
-                <pre className="lyrics-text">{lyricsText || 'No lyrics available for this song.'}</pre>
-              ) : (
-                <span className="lyrics-loading">Loading…</span>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+    {showLyrics && (
+  <div className="lyrics-box-above-player">
+    <div className="lyrics-box-inner">
+      <h4 className="lyrics-box-title">Lyrics</h4>
+      <div className="lyrics-box-content">
+
+        {/* ✅ Synced lyrics — animated highlight */}
+        {lyricsMode === "synced" && syncedLyrics?.length > 0 ? (
+          syncedLyrics.map((line, i) => (
+            <p
+              key={i}
+              className={`lyric-line ${
+                i === activeLyricIndex ? "active" : i < activeLyricIndex ? "past" : ""
+              }`}
+            >
+              {line.text}
+            </p>
+          ))
+
+        /* ✅ Plain lyrics — your existing behavior */
+        ) : lyricsText !== null ? (
+          <pre className="lyrics-text">
+            {lyricsText || "No lyrics available for this song."}
+          </pre>
+
+        /* ✅ Loading state */
+        ) : (
+          <span className="lyrics-loading">Loading…</span>
+        )}
+
+      </div>
+    </div>
+  </div>
+)}
 
       <div className="playerbar-container">
       <div className="playerbar-inner">

@@ -457,6 +457,9 @@ import {
 } from "firebase/firestore";
 import SongList from "./SongList";
 import "./HomePage.css";
+// Add these to your existing imports
+import { auth } from "../firebase";
+import { getRecommendations } from "../utils/recommendationEngine";
 
 export default function HomePage({
   userId,
@@ -475,135 +478,210 @@ export default function HomePage({
   const [favourites, setFavourites] = useState([]);
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
-
+const [playHistory, setPlayHistory] = useState([]);
   // Track if the Telegram bot is currently "cooking" the MP3
   const [isPreparing, setIsPreparing] = useState(false);
 
-  useEffect(() => {
-    // 🛡️ Step 1: Safety Guard
-    // If Firebase hasn't given us a userId yet, don't do anything.
-    if (!userId) return;
+  // useEffect(() => {
+  //   // 🛡️ Step 1: Safety Guard
+  //   // If Firebase hasn't given us a userId yet, don't do anything.
+  //   if (!userId) return;
 
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // 1. Fetch User's Liked Songs (Favourites)
-        const userDocRef = doc(db, "users", userId);
-        const userDocSnap = await getDoc(userDocRef);
-        const likedSongsArray = userDocSnap.exists()
-          ? userDocSnap.data().likedSongs || []
-          : [];
-        setFavourites(likedSongsArray);
+  //   const fetchData = async () => {
+  //     setLoading(true);
+  //     try {
+  //       // 1. Fetch User's Liked Songs (Favourites)
+  //       const userDocRef = doc(db, "users", userId);
+  //       const userDocSnap = await getDoc(userDocRef);
+  //       const likedSongsArray = userDocSnap.exists()
+  //         ? userDocSnap.data().likedSongs || []
+  //         : [];
+  //       setFavourites(likedSongsArray);
 
-        // 2. Fetch User's Playlists from sub-collection
-        const plSnap = await getDocs(collection(db, "playlists", userId, "userPlaylists"));
-        setPlaylists(
-          plSnap.docs.map((d) => ({
-            id: d.id,
-            name: d.data().name || d.id,
-            songs: d.data().songs || [],
-          }))
-        );
+  //       // 2. Fetch User's Playlists from sub-collection
+  //       const plSnap = await getDocs(collection(db, "playlists", userId, "userPlaylists"));
+  //       setPlaylists(
+  //         plSnap.docs.map((d) => ({
+  //           id: d.id,
+  //           name: d.data().name || d.id,
+  //           songs: d.data().songs || [],
+  //         }))
+  //       );
 
-        // ─── 3. Recommendation Engine (Artist Scoring Matrix + Trending API) ───
-        const JIOSAAVN_API = "https://jiosaavn-api-privatecvc2.vercel.app/search/songs";
+  //       // ─── 3. Recommendation Engine (Artist Scoring Matrix + Trending API) ───
+  //       const JIOSAAVN_API = "https://jiosaavn-api-privatecvc2.vercel.app/search/songs";
 
-        // Checklist of all liked songs: by id and by media_url (so we never recommend what you already have)
-        const likedIds = new Set(likedSongsArray.map((s) => s.id).filter(Boolean));
-        const likedMediaUrls = new Set(likedSongsArray.map((s) => s.media_url).filter(Boolean));
-        if (likedSongs && typeof likedSongs === "object") {
-          Object.keys(likedSongs).forEach((k) => {
-            likedIds.add(k);
-            likedMediaUrls.add(k);
-          });
-        }
+  //       // Checklist of all liked songs: by id and by media_url (so we never recommend what you already have)
+  //       const likedIds = new Set(likedSongsArray.map((s) => s.id).filter(Boolean));
+  //       const likedMediaUrls = new Set(likedSongsArray.map((s) => s.media_url).filter(Boolean));
+  //       if (likedSongs && typeof likedSongs === "object") {
+  //         Object.keys(likedSongs).forEach((k) => {
+  //           likedIds.add(k);
+  //           likedMediaUrls.add(k);
+  //         });
+  //       }
 
-        const isAlreadyLiked = (track) => {
-          if (track.id && likedIds.has(track.id)) return true;
-          const url = track.downloadUrl?.[4]?.link || track.downloadUrl?.[3]?.link || track.downloadUrl?.[2]?.link;
-          if (url && likedMediaUrls.has(url)) return true;
-          return false;
+  //       const isAlreadyLiked = (track) => {
+  //         if (track.id && likedIds.has(track.id)) return true;
+  //         const url = track.downloadUrl?.[4]?.link || track.downloadUrl?.[3]?.link || track.downloadUrl?.[2]?.link;
+  //         if (url && likedMediaUrls.has(url)) return true;
+  //         return false;
+  //       };
+
+  //       // Artist Scoring Matrix: from Liked Songs → count per artist → Top 3 absolute favorites
+  //       const artistScores = {};
+  //       likedSongsArray.forEach((song) => {
+  //         if (song.singers) {
+  //           song.singers.split(",").forEach((name) => {
+  //             const artist = name.trim();
+  //             if (artist) artistScores[artist] = (artistScores[artist] || 0) + 1;
+  //           });
+  //         }
+  //       });
+  //       const topArtists = Object.entries(artistScores)
+  //         .sort((a, b) => b[1] - a[1])
+  //         .slice(0, 3)
+  //         .map((e) => e[0]);
+
+  //       // Trending API Fetch: 15 most popular/trending songs per top artist (45 total), or platform-wide for new users
+  //       let rawRecs = [];
+  //       if (topArtists.length > 0) {
+  //         for (const artist of topArtists) {
+  //           try {
+  //             const res = await fetch(`${JIOSAAVN_API}?query=${encodeURIComponent(artist)}&limit=15`);
+  //             const data = await res.json();
+  //             const results = data?.data?.results ?? data?.results ?? [];
+  //             if (Array.isArray(results)) rawRecs = [...rawRecs, ...results];
+  //           } catch (err) {
+  //             console.error(`❌ Recommendations for artist "${artist}":`, err);
+  //           }
+  //         }
+  //       } else {
+  //         try {
+  //           const res = await fetch(`${JIOSAAVN_API}?query=trending&limit=15`);
+  //           const data = await res.json();
+  //           const results = data?.data?.results ?? data?.results ?? [];
+  //           if (Array.isArray(results)) rawRecs = results;
+  //         } catch (err) {
+  //           console.error("❌ Trending fallback:", err);
+  //         }
+  //       }
+
+  //       // Smart Filtering: drop already-liked and duplicates; then Trending Sort by playCount
+  //       const uniqueRecs = new Map();
+  //       rawRecs.forEach((track) => {
+  //         if (isAlreadyLiked(track) || uniqueRecs.has(track.id)) return;
+  //         uniqueRecs.set(track.id, track);
+  //       });
+
+  //       const sorted = Array.from(uniqueRecs.values()).sort((a, b) => {
+  //         const playA = parseInt(a.playCount, 10) || 0;
+  //         const playB = parseInt(b.playCount, 10) || 0;
+  //         return playB - playA;
+  //       });
+
+  //       // Instant Playback Prep: normalize to app shape + 320kbps direct URL
+  //       const finalRecs = sorted.slice(0, 12).map((track) => {
+  //         const media_url =
+  //           track.downloadUrl?.[4]?.link || track.downloadUrl?.[3]?.link || track.downloadUrl?.[2]?.link || null;
+  //         return {
+  //           id: track.id,
+  //           title: track.name,
+  //           singers: track.primaryArtists ?? track.singers ?? "Unknown",
+  //           album: track.album?.name || "Single",
+  //           image: track.image?.[2]?.link || track.image?.[1]?.link,
+  //           year: track.year,
+  //           duration: track.duration,
+  //           media_url,
+  //         };
+  //       });
+
+  //       setRecommended(finalRecs);
+
+  //     } catch (err) {
+  //       console.error("❌ Error fetching Homepage data:", err);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [userId, Object.keys(likedSongs || {}).length]);
+
+
+
+useEffect(() => {
+  if (!userId) return;
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // 1. Fetch User Doc (liked songs + play history)
+      const userDocRef = doc(db, "users", userId);
+      const userDocSnap = await getDoc(userDocRef);
+      const userData = userDocSnap.exists() ? userDocSnap.data() : {};
+
+      const likedSongsArray = userData.likedSongs || [];
+      const playHistoryArray = userData.playHistory || [];
+
+      setFavourites(likedSongsArray);
+      setPlayHistory(playHistoryArray);
+
+      // 2. Fetch Playlists
+      const plSnap = await getDocs(collection(db, "playlists", userId, "userPlaylists"));
+      setPlaylists(
+        plSnap.docs.map((d) => ({
+          id: d.id,
+          name: d.data().name || d.id,
+          songs: d.data().songs || [],
+        }))
+      );
+
+      // 3. ── ML Recommendation Engine ──────────────────────────────────────
+      const recs = await getRecommendations(likedSongsArray, playHistoryArray);
+
+      // Normalize API shape → your app shape
+      const finalRecs = recs.slice(0, 15).map((track) => {
+        // Already normalized (from liked songs in Firebase)
+        if (track.media_url) return track;
+
+        // From JioSaavn API — normalize it
+        const media_url =
+          track.downloadUrl?.[4]?.link ||
+          track.downloadUrl?.[3]?.link ||
+          track.downloadUrl?.[2]?.link || null;
+
+        return {
+          id: track.id,
+          title: track.name,
+          name: track.name,
+          singers: track.primaryArtists || track.singers || "Unknown",
+          primaryArtists: track.primaryArtists || track.singers || "Unknown",
+          featuredArtists: track.featuredArtists || "",
+          album: track.album?.name || track.album || "Single",
+          image: track.image?.[2]?.link || track.image?.[1]?.link || track.image?.[0]?.link,
+          year: track.year,
+          duration: track.duration,
+          label: track.label,
+          playCount: track.playCount,
+          media_url,
         };
+      });
 
-        // Artist Scoring Matrix: from Liked Songs → count per artist → Top 3 absolute favorites
-        const artistScores = {};
-        likedSongsArray.forEach((song) => {
-          if (song.singers) {
-            song.singers.split(",").forEach((name) => {
-              const artist = name.trim();
-              if (artist) artistScores[artist] = (artistScores[artist] || 0) + 1;
-            });
-          }
-        });
-        const topArtists = Object.entries(artistScores)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 3)
-          .map((e) => e[0]);
+      setRecommended(finalRecs);
 
-        // Trending API Fetch: 15 most popular/trending songs per top artist (45 total), or platform-wide for new users
-        let rawRecs = [];
-        if (topArtists.length > 0) {
-          for (const artist of topArtists) {
-            try {
-              const res = await fetch(`${JIOSAAVN_API}?query=${encodeURIComponent(artist)}&limit=15`);
-              const data = await res.json();
-              const results = data?.data?.results ?? data?.results ?? [];
-              if (Array.isArray(results)) rawRecs = [...rawRecs, ...results];
-            } catch (err) {
-              console.error(`❌ Recommendations for artist "${artist}":`, err);
-            }
-          }
-        } else {
-          try {
-            const res = await fetch(`${JIOSAAVN_API}?query=trending&limit=15`);
-            const data = await res.json();
-            const results = data?.data?.results ?? data?.results ?? [];
-            if (Array.isArray(results)) rawRecs = results;
-          } catch (err) {
-            console.error("❌ Trending fallback:", err);
-          }
-        }
+    } catch (err) {
+      console.error("❌ Error fetching Homepage data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        // Smart Filtering: drop already-liked and duplicates; then Trending Sort by playCount
-        const uniqueRecs = new Map();
-        rawRecs.forEach((track) => {
-          if (isAlreadyLiked(track) || uniqueRecs.has(track.id)) return;
-          uniqueRecs.set(track.id, track);
-        });
+  fetchData();
+}, [userId]);  // ✅ clean dependency — no more Object.keys hack
 
-        const sorted = Array.from(uniqueRecs.values()).sort((a, b) => {
-          const playA = parseInt(a.playCount, 10) || 0;
-          const playB = parseInt(b.playCount, 10) || 0;
-          return playB - playA;
-        });
 
-        // Instant Playback Prep: normalize to app shape + 320kbps direct URL
-        const finalRecs = sorted.slice(0, 12).map((track) => {
-          const media_url =
-            track.downloadUrl?.[4]?.link || track.downloadUrl?.[3]?.link || track.downloadUrl?.[2]?.link || null;
-          return {
-            id: track.id,
-            title: track.name,
-            singers: track.primaryArtists ?? track.singers ?? "Unknown",
-            album: track.album?.name || "Single",
-            image: track.image?.[2]?.link || track.image?.[1]?.link,
-            year: track.year,
-            duration: track.duration,
-            media_url,
-          };
-        });
 
-        setRecommended(finalRecs);
-
-      } catch (err) {
-        console.error("❌ Error fetching Homepage data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [userId, Object.keys(likedSongs || {}).length]);
 
   // 🎵 Helper: When you click a song, this tells the Player to start the Telegram flow
   const bindPlay = (list) => async (index) => {

@@ -8,14 +8,16 @@ import DotGrid from "./DotGrid.jsx";
 import SongList from "./SongList.jsx";
 import { auth, db } from "../firebase";
 import { signOut, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, getDocs, collection } from "firebase/firestore";
+// import { doc, getDoc, getDocs, collection } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { likeSong, unlikeSong } from "../utils/likedSong.js";
 import Favourites from "./favourites.jsx";
 import Playlists from "./PlayLists.jsx";
 import { getAllPlaylists } from "../utils/PlaylistUtils.js";
 import HomePage from "./HomePage.jsx";
-
+// import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
+// import { updateDoc, arrayUnion } from "firebase/firestore";
+import { doc, getDoc, getDocs, collection, updateDoc, arrayUnion } from "firebase/firestore";
 function Player() {
   const [songs, setSongs] = useState([]);
   const [visibleLyrics, setVisibleLyrics] = useState({});
@@ -43,7 +45,9 @@ function Player() {
   const [queue, setQueue] = useState([]);
   const [showLyrics, setShowLyrics] = useState(false);
   const [lyricsText, setLyricsText] = useState(null);
-
+  // Add these near your other useState declarations (~line 35)
+  const [syncedLyrics, setSyncedLyrics] = useState([]); // parsed [{time, text}] array
+  const [lyricsMode, setLyricsMode] = useState("plain"); // "synced" | "plain"
   // ✅ Toggle open/close
   const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
@@ -93,23 +97,161 @@ function Player() {
   }, [navigate]);
 
   const currentPlayingSong = playingSongIndex !== null && playingSongs[playingSongIndex] ? playingSongs[playingSongIndex] : null;
+useEffect(() => {
+  if (!showLyrics || !currentPlayingSong?.id) {
+    setLyricsText(null);
+    setSyncedLyrics([]);
+    setLyricsMode("plain");
+    return;
+  }
 
-  useEffect(() => {
-    if (!showLyrics || !currentPlayingSong?.id) {
-      setLyricsText(null);
+  setLyricsText(null);
+  setSyncedLyrics([]);
+  setLyricsMode("plain");
+
+  const id = currentPlayingSong.id;
+  const apiBase = "https://jiosaavn-api-privatecvc2.vercel.app";
+  const artistName = currentPlayingSong.primaryArtists?.split(",")?.[0]?.trim()
+    || currentPlayingSong.singers?.split(",")?.[0]?.trim() || "";
+  const songName = currentPlayingSong.name || currentPlayingSong.title || "";
+  const duration = parseInt(currentPlayingSong.duration) || 200;
+
+  const parseLRC = (lrcString) => {
+    return lrcString.split("\n").map((line) => {
+      const match = line.match(/\[(\d+):(\d+\.\d+)\](.*)/);
+      if (!match) return null;
+      const time = parseInt(match[1]) * 60 + parseFloat(match[2]);
+      const text = match[3].trim();
+      return text ? { time, text } : null;
+    }).filter(Boolean);
+  };
+
+// const trackPlayedSong = async (song) => {
+//   const user = auth.currentUser;
+//   if (!user || !song?.id) return;
+//   try {
+//     const docRef = doc(db, "users", user.uid);
+//     await updateDoc(docRef, {
+//       playHistory: arrayUnion({
+//         id: song.id,
+//         name: song.name || song.title,
+//         primaryArtists: song.primaryArtists || song.singers || "",
+//         featuredArtists: song.featuredArtists || "",
+//         album: song.album?.name || song.album || "",
+//         playedAt: Date.now(),
+//       })
+//     });
+//   } catch (err) {
+//     console.error("❌ trackPlayedSong failed:", err);
+//   }
+// };
+
+  const fetchAISync = async (plainLyrics) => {
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          messages: [{
+            role: "user",
+            content: `This song is ${duration} seconds long.
+Here are the lyrics:
+${plainLyrics}
+
+Distribute timestamps naturally based on typical singing pace.
+Return ONLY a JSON array, no explanation, no markdown:
+[{"time": 12.5, "text": "first lyric line"},{"time": 16.2, "text": "second line"}]`
+          }]
+        })
+      });
+      const data = await response.json();
+      const raw = data.content?.[0]?.text || "";
+      const clean = raw.replace(/```json|```/g, "").trim();
+      return JSON.parse(clean);
+    } catch (err) {
+      console.error("❌ AI sync failed:", err);
+      return null;
+    }
+  };
+
+  const loadLyrics = async () => {
+    // 🥇 Step 1: Try LRCLIB for real synced lyrics
+    try {
+      const lrcRes = await fetch(
+        `https://lrclib.net/api/get?artist_name=${encodeURIComponent(artistName)}&track_name=${encodeURIComponent(songName)}&duration=${duration}`
+      );
+      if (lrcRes.ok) {
+        const lrcData = await lrcRes.json();
+        if (lrcData.syncedLyrics) {
+          console.log("✅ LRCLIB synced lyrics found");
+          const parsed = parseLRC(lrcData.syncedLyrics);
+          if (parsed.length > 0) {
+            setSyncedLyrics(parsed);
+            setLyricsMode("synced");
+            setLyricsText(null);
+            return; // done!
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("LRCLIB unavailable:", err);
+    }
+
+
+
+
+// const trackPlayedSong = async (song) => {
+//   const user = auth.currentUser;
+//   if (!user || !song?.id) return;
+
+//   const docRef = doc(db, "users", user.uid);
+//   await updateDoc(docRef, {
+//     playHistory: arrayUnion({
+//       id: song.id,
+//       name: song.name || song.title,
+//       primaryArtists: song.primaryArtists || song.singers,
+//       album: song.album?.name || song.album,
+//       playedAt: Date.now()   // timestamp for recency weighting later
+//     })
+//   });
+// };
+
+    // 🥈 Step 2: Fetch plain lyrics from JioSaavn
+    let plainLyrics = "";
+    try {
+      const res = await fetch(`${apiBase}/lyrics?id=${encodeURIComponent(id)}`);
+      if (res.ok) {
+        const data = await res.json();
+        plainLyrics = data?.lyrics ?? data?.data?.lyrics ?? data?.text ?? "";
+      }
+    } catch (err) {
+      console.warn("JioSaavn lyrics fetch failed:", err);
+    }
+
+    if (!plainLyrics) {
+      setLyricsText("Lyrics not available.");
+      setLyricsMode("plain");
       return;
     }
-    setLyricsText(null);
-    const id = currentPlayingSong.id;
-    const apiBase = "https://jiosaavn-api-privatecvc2.vercel.app";
-    fetch(`${apiBase}/lyrics?id=${encodeURIComponent(id)}`)
-      .then((res) => res.ok ? res.json() : {})
-      .then((data) => {
-        const text = data?.lyrics ?? data?.data?.lyrics ?? data?.text ?? "";
-        setLyricsText(typeof text === "string" ? text : "");
-      })
-      .catch(() => setLyricsText(""));
-  }, [showLyrics, currentPlayingSong?.id]);
+
+    // 🥉 Step 3: Try AI to estimate timestamps from plain lyrics
+    const aiSynced = await fetchAISync(plainLyrics);
+    if (aiSynced && aiSynced.length > 0) {
+      console.log("✅ AI estimated sync applied");
+      setSyncedLyrics(aiSynced);
+      setLyricsMode("synced");
+      setLyricsText(null);
+    } else {
+      // 🏳️ Fallback: plain lyrics
+      setLyricsText(typeof plainLyrics === "string" ? plainLyrics : "");
+      setLyricsMode("plain");
+    }
+  };
+
+  loadLyrics();
+}, [showLyrics, currentPlayingSong?.id]);
 
   // / Just to see what's going on
   useEffect(() => {
@@ -368,7 +510,25 @@ function Player() {
   };
 
 
-
+  const trackPlayedSong = async (song) => {
+  const user = auth.currentUser;
+  if (!user || !song?.id) return;
+  try {
+    const docRef = doc(db, "users", user.uid);
+    await updateDoc(docRef, {
+      playHistory: arrayUnion({
+        id: song.id,
+        name: song.name || song.title,
+        primaryArtists: song.primaryArtists || song.singers || "",
+        featuredArtists: song.featuredArtists || "",
+        album: song.album?.name || song.album || "",
+        playedAt: Date.now(),
+      })
+    });
+  } catch (err) {
+    console.error("❌ trackPlayedSong failed:", err);
+  }
+};
   const handleHomeClick = () => {
     // setShowSearch(false);
     setshowPlayList(false);
@@ -541,6 +701,8 @@ function Player() {
     setPlayingSongs(currentList);
     setPlayingSongIndex(index);
     setIsPlaying(false);
+    // inside handleMainPlay, after setPlayingSongIndex(index):
+trackPlayedSong(selectedSong);
 
     const audio = persistentAudioRef.current;
     if (!audio) return;
@@ -812,6 +974,8 @@ function Player() {
           showLyrics={showLyrics}
           onToggleLyrics={() => setShowLyrics((v) => !v)}
           lyricsText={lyricsText}
+          syncedLyrics={syncedLyrics}
+          lyricsMode={lyricsMode}
         />
       )}
 

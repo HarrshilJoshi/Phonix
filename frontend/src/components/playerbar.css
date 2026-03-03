@@ -534,7 +534,30 @@
   }
 } */
 
+.lyric-line {
+  font-size: 1rem;
+  line-height: 2;
+  margin: 4px 0;
+  opacity: 0.35;
+  color: #ffffff;
+  transition: all 0.4s ease;
+  text-align: center;
+}
 
+.lyric-line.past {
+  opacity: 0.2;
+  font-size: 0.92rem;
+}
+
+.lyric-line.active {
+  opacity: 1;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #5227FF;
+  transform: scale(1.04);
+  text-shadow: 0 0 16px rgba(82, 39, 255, 0.45);
+  transition: all 0.3s ease;
+}
 
 @media (max-width: 768px) {
   .playerbar-container {
@@ -666,6 +689,8 @@
   }
 }
 
+
+
 @media (max-width: 480px) {
  .playerbar-inner {
     grid-template-areas:
@@ -721,3 +746,5 @@
     min-width: 26px;
   }
 }
+
+
