@@ -76,10 +76,5 @@ Run the development server:
 ```bash
 npm run dev
 ```
-
-## 📜 License
-
-This project is licensed under the MIT License.
-
 ## ✨ Author
 [Harshil Joshi](https://github.com/HarrshilJoshi)
