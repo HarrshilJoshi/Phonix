@@ -146,7 +146,7 @@ const SearchBar = ({ onResults }) => {
     if (!query.trim()) return;
 
     // Use the exact API from your reference code
-    const searchUrl = "https://jiosaavn-api-privatecvc2.vercel.app/search/songs?query=";
+    const searchUrl = "http://localhost:3000/search?query=";
     const currentPage = isNextPage ? page + 1 : 1;
 
     try {

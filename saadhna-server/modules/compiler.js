@@ -5,7 +5,26 @@ const fs = require('fs');
 const ffmpeg = require('./ffmpeg.js')
 const he = require('he');
 const telegram_mod = require('./telegram.js')
-// song constructor
+const CryptoJS = require('crypto-js');
+
+function decryptUrl(encryptedText) {
+  if (!encryptedText) return "";
+  try {
+    const key = CryptoJS.enc.Utf8.parse('38346591');
+    const decrypted = CryptoJS.DES.decrypt(
+      encryptedText,
+      key,
+      {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+      }
+    );
+    return decrypted.toString(CryptoJS.enc.Utf8);
+  } catch (err) {
+    console.error("DES Decryption failed:", err);
+    return "";
+  }
+}
 
 function Song(data) {
     // html special chars decode if name, album, artist, copyright contains '&'
@@ -140,22 +159,53 @@ function Song(data) {
         
             return "hello"; });});
 }}
-var api_url = "https://jiosaavn-api-privatecvc2.vercel.app/songs";
+var api_url = "https://www.jiosaavn.com/api.php?__call=song.getDetails&_format=json";
 async function compile(id) {
     // call api with id
-    var url = api_url + "/?id=" + id;
+    var url = api_url + "&pids=" + id;
     console.log(url);
     // call the api and console log the response code
     
-    var response = await axios.get(url, {headers:{'Accept-Encoding': 'application/json'}});
-    // set json encoding
+    var response = await axios.get(url, {
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+    });
     
     console.log(response.status);
     // if the response code is 200, then the api call was successful
-    if (response.status == 200) {
+    if (response.status == 200 && response.data && response.data[id]) {
         // get the data from the response
-        var data = response.data.data[0];
+        var rawData = response.data[id];
         
+        // Normalize the raw JioSaavn data to match what Song expects
+        const img = rawData.image || "";
+        const decrypted = decryptUrl(rawData.encrypted_media_url);
+        const media_url_320 = decrypted ? decrypted.replace(/_(96|48|12|160|320)\.(mp4|mp3)/, "_320.$2") : "";
+
+        var data = {
+            id: rawData.id,
+            name: rawData.song,
+            album: { name: rawData.album },
+            primaryArtists: rawData.primary_artists || rawData.music || "Unknown Artist",
+            copyright: rawData.copyright_text,
+            duration: rawData.duration,
+            url: rawData.perma_url,
+            image: [
+                { quality: "50x50", link: img.replace("150x150", "50x50") },
+                { quality: "150x150", link: img },
+                { quality: "500x500", link: img.replace("150x150", "500x500") }
+            ],
+            downloadUrl: [
+                { quality: "12kbps", link: decrypted ? decrypted.replace(/_(96|48|12|160|320)\.(mp4|mp3)/, "_12.$2") : "" },
+                { quality: "48kbps", link: decrypted ? decrypted.replace(/_(96|48|12|160|320)\.(mp4|mp3)/, "_48.$2") : "" },
+                { quality: "96kbps", link: decrypted || "" },
+                { quality: "160kbps", link: decrypted ? decrypted.replace(/_(96|48|12|160|320)\.(mp4|mp3)/, "_160.$2") : "" },
+                { quality: "320kbps", link: media_url_320 }
+            ],
+            year: rawData.year
+        };
+
         // create a new song object
         var song = new Song(data);
         console.log(song);
@@ -171,17 +221,7 @@ async function compile(id) {
 
         // compile song
         await song.compile();
-        // send to dlist and remove from clist
-        
-
-
     }
-
-   
-
-    // get mp3 data
-    // compile mp3 data
-    // save mp3 data
     return 0;
 }
 module.exports = {

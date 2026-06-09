@@ -121,6 +121,31 @@
   box-shadow: 0 4px 20px rgba(82, 39, 255, 0.6);
 }
 
+
+.lyric-line {
+  font-size: 1rem;
+  line-height: 2;
+  margin: 4px 0;
+  opacity: 0.35;
+  color: #ffffff;
+  transition: all 0.4s ease;
+  text-align: center;
+}
+
+.lyric-line.past {
+  opacity: 0.2;
+  font-size: 0.92rem;
+}
+
+.lyric-line.active {
+  opacity: 1;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #5227FF;
+  transform: scale(1.04);
+  text-shadow: 0 0 16px rgba(82, 39, 255, 0.45);
+  transition: all 0.3s ease;
+}
 /* ========== Progress Bar ========== */
 .progress-wrapper {
   display: flex;
@@ -721,3 +746,153 @@
     min-width: 26px;
   }
 }
+
+/* ========== Active Button Colors ========== */
+.pb-btn.active {
+  color: #5227FF !important;
+  background-color: rgba(82, 39, 255, 0.15) !important;
+  box-shadow: 0 0 8px rgba(82, 39, 255, 0.4);
+}
+
+/* ========== Queue Box directly above playerbar ========== */
+.queue-box-above-player {
+  position: absolute;
+  bottom: 100%;
+  left: 8px;
+  right: 8px;
+  margin-bottom: 4px;
+  max-height: 280px;
+  pointer-events: auto;
+  z-index: 1001;
+}
+
+.queue-box-inner {
+  background: linear-gradient(180deg, #161a2e 0%, #0d1222 100%);
+  border: 1px solid rgba(82, 39, 255, 0.4);
+  border-radius: 10px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 280px;
+}
+
+.queue-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.queue-box-title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #a0a0b8;
+}
+
+.clear-queue-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: #a0a0b8;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-queue-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: #fff;
+}
+
+.queue-box-content {
+  padding: 10px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.queue-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.queue-section-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #8888a8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.queue-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  transition: background 0.2s ease;
+}
+
+.queue-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.queue-item.active {
+  background: rgba(82, 39, 255, 0.15);
+  border-left: 3px solid #5227FF;
+}
+
+.qi-art {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.qi-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.qi-title {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qi-artist {
+  font-size: 0.7rem;
+  color: #8888a8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qi-remove-btn {
+  background: transparent;
+  border: none;
+  color: #8888a8;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 6px;
+}
+
+.qi-remove-btn:hover {
+  color: #ff4d4d;
+}
