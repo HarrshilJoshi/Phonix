@@ -6,7 +6,7 @@ var https = require('https');
 const CryptoJS = require('crypto-js');
 
 var queue = require('../queue.js');
-const app = require('../index.js');
+// const app = require('../index.js');
 const rateLimit = require('express-rate-limit');
 var telegram_mod = require('../modules/telegram.js');
 
