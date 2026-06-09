@@ -120,7 +120,7 @@ useEffect(() => {
   setLyricsMode("plain");
 
   const id = currentPlayingSong.id;
-  const apiBase = "http://localhost:3000";
+  const apiBase = import.meta.env.DEV ? "http://localhost:3000" : "";
   const artistName = currentPlayingSong.primaryArtists?.split(",")?.[0]?.trim()
     || currentPlayingSong.singers?.split(",")?.[0]?.trim() || "";
   const songName = currentPlayingSong.name || currentPlayingSong.title || "";
@@ -699,7 +699,7 @@ trackPlayedSong(selectedSong);
     }
 
     // ✅ SLOW PATH (fallback): Use saadhna-server for songs without direct URL
-    const SERVER_URL = "http://localhost:3000";
+    const SERVER_URL = import.meta.env.DEV ? "http://localhost:3000" : "";
 
     try {
       console.log("🤖 No direct URL, asking Bot:", selectedSong.id);

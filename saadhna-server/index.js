@@ -114,6 +114,9 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Serve static files from the React frontend build
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
 // ✅ Allow React to communicate with this server
 app.use(cors());
 app.use(express.json());
@@ -123,6 +126,11 @@ global.compile_dir = path.join(__dirname, 'compiled');
 
 const api = require('./api/routes.js');
 app.use('/', api);
+
+// Serve index.html for all other non-matching routes (for React client-side routing)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+});
 
 app.listen(PORT, function () {
     console.log(` ---- MP3 IS SERVING MUSIC ---- `);

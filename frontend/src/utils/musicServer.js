@@ -1,7 +1,7 @@
 
 
 
-const SERVER_URL = "https://phonix-x7de.onrender.com/"; // Update with your server port
+const SERVER_URL = import.meta.env.DEV ? "http://localhost:3000" : ""; // Support both local dev and production
 
 export const prepareAndPlaySong = async (trackId) => {
   try {

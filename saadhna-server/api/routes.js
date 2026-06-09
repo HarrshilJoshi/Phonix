@@ -37,10 +37,10 @@ const limiter = rateLimit({
 })
 
 // GET home page.
-router.get('/', function(req, res, next) {
-    // return helloworld
-    res.send('Hello World');
-});
+// router.get('/', function(req, res, next) {
+//     // return helloworld
+//     res.send('Hello World');
+// });
 
 router.get('/search', async function(req, res, next) {
     var query = req.query.query;
