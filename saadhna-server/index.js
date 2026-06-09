@@ -114,8 +114,13 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Determine build folder path (fall back to ../frontend/dist if local copy ./dist doesn't exist)
+const distPath = fs.existsSync(path.join(__dirname, 'dist')) 
+    ? path.join(__dirname, 'dist') 
+    : path.join(__dirname, '../frontend/dist');
+
 // Serve static files from the React frontend build
-app.use(express.static(path.join(__dirname, '../frontend/dist')));
+app.use(express.static(distPath));
 
 // ✅ Allow React to communicate with this server
 app.use(cors());
@@ -129,7 +134,7 @@ app.use('/', api);
 
 // Serve index.html for all other non-matching routes (for React client-side routing)
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+    res.sendFile(path.join(distPath, 'index.html'));
 });
 
 app.listen(PORT, function () {
