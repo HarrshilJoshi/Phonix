@@ -509,7 +509,7 @@ const [playHistory, setPlayHistory] = useState([]);
   //       );
 
   //       // ─── 3. Recommendation Engine (Artist Scoring Matrix + Trending API) ───
-  //       const JIOSAAVN_API = "https://jiosaavn-api-privatecvc2.vercel.app/search/songs";
+  //       const JIOSAAVN_API = "http://localhost:3000/search";
 
   //       // Checklist of all liked songs: by id and by media_url (so we never recommend what you already have)
   //       const likedIds = new Set(likedSongsArray.map((s) => s.id).filter(Boolean));

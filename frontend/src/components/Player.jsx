@@ -43,6 +43,8 @@ function Player() {
   const [playingSongs, setPlayingSongs] = useState([]);
   const [playingSongIndex, setPlayingSongIndex] = useState(null);
   const [queue, setQueue] = useState([]);
+  const [isShuffle, setIsShuffle] = useState(false);
+  const [isRepeat, setIsRepeat] = useState(false);
   const [showLyrics, setShowLyrics] = useState(false);
   const [lyricsText, setLyricsText] = useState(null);
   // Add these near your other useState declarations (~line 35)
@@ -72,7 +74,14 @@ function Player() {
       setPlayingSongIndex(0);
       handleMainPlay(0, [nextSong, ...rest]);
     } else {
-      const nextIndex = (playingSongIndex + 1) % Math.max(playingSongs.length, 1);
+      let nextIndex;
+      if (isShuffle && playingSongs.length > 1) {
+        do {
+          nextIndex = Math.floor(Math.random() * playingSongs.length);
+        } while (nextIndex === playingSongIndex);
+      } else {
+        nextIndex = (playingSongIndex + 1) % Math.max(playingSongs.length, 1);
+      }
       handleMainPlay(nextIndex, playingSongs);
     }
   };
@@ -105,12 +114,13 @@ useEffect(() => {
     return;
   }
 
+
   setLyricsText(null);
   setSyncedLyrics([]);
   setLyricsMode("plain");
 
   const id = currentPlayingSong.id;
-  const apiBase = "https://jiosaavn-api-privatecvc2.vercel.app";
+  const apiBase = "http://localhost:3000";
   const artistName = currentPlayingSong.primaryArtists?.split(",")?.[0]?.trim()
     || currentPlayingSong.singers?.split(",")?.[0]?.trim() || "";
   const songName = currentPlayingSong.name || currentPlayingSong.title || "";
@@ -126,25 +136,6 @@ useEffect(() => {
     }).filter(Boolean);
   };
 
-// const trackPlayedSong = async (song) => {
-//   const user = auth.currentUser;
-//   if (!user || !song?.id) return;
-//   try {
-//     const docRef = doc(db, "users", user.uid);
-//     await updateDoc(docRef, {
-//       playHistory: arrayUnion({
-//         id: song.id,
-//         name: song.name || song.title,
-//         primaryArtists: song.primaryArtists || song.singers || "",
-//         featuredArtists: song.featuredArtists || "",
-//         album: song.album?.name || song.album || "",
-//         playedAt: Date.now(),
-//       })
-//     });
-//   } catch (err) {
-//     console.error("❌ trackPlayedSong failed:", err);
-//   }
-// };
 
   const fetchAISync = async (plainLyrics) => {
     try {
@@ -199,24 +190,6 @@ Return ONLY a JSON array, no explanation, no markdown:
       console.warn("LRCLIB unavailable:", err);
     }
 
-
-
-
-// const trackPlayedSong = async (song) => {
-//   const user = auth.currentUser;
-//   if (!user || !song?.id) return;
-
-//   const docRef = doc(db, "users", user.uid);
-//   await updateDoc(docRef, {
-//     playHistory: arrayUnion({
-//       id: song.id,
-//       name: song.name || song.title,
-//       primaryArtists: song.primaryArtists || song.singers,
-//       album: song.album?.name || song.album,
-//       playedAt: Date.now()   // timestamp for recency weighting later
-//     })
-//   });
-// };
 
     // 🥈 Step 2: Fetch plain lyrics from JioSaavn
     let plainLyrics = "";
@@ -976,6 +949,12 @@ trackPlayedSong(selectedSong);
           lyricsText={lyricsText}
           syncedLyrics={syncedLyrics}
           lyricsMode={lyricsMode}
+          isShuffle={isShuffle}
+          setIsShuffle={setIsShuffle}
+          isRepeat={isRepeat}
+          setIsRepeat={setIsRepeat}
+          queue={queue}
+          setQueue={setQueue}
         />
       )}
 
