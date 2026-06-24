@@ -135,21 +135,8 @@ You can deploy this app easily using [Netlify](https://netlify.com/) or [Vercel]
 
 ---
 
-## ✅ Todo (Optional Ideas)
-
-* Add playlists and song upload
-* Integrate Spotify API
-* Dark/light mode toggle
-* User profiles
 
 ---
-
-## 📜 License
-
-This project is licensed under the [MIT License](./LICENSE).
-
----
-
 ## ✨ Author
 [Harshil Joshi](https://github.com/HarrshilJoshi)
 
