@@ -1,4 +1,4 @@
-const CACHE_NAME = 'phonix-music-cache-v1';
+const CACHE_NAME = 'phonix-music-cache-v2';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -15,17 +15,56 @@ self.addEventListener('install', event => {
                 return cache.addAll(urlsToCache);
             })
     );
+    self.skipWaiting(); // Force the waiting service worker to become the active service worker
 });
 
 self.addEventListener('fetch', event => {
+    // For navigation requests (like index.html / page loads), try network first, fallback to cache
+    if (event.request.mode === 'navigate' || 
+        (event.request.method === 'GET' && event.request.headers.get('accept')?.includes('text/html'))) {
+        event.respondWith(
+            fetch(event.request)
+                .then(response => {
+                    if (response.status === 200) {
+                        const responseClone = response.clone();
+                        caches.open(CACHE_NAME).then(cache => {
+                            cache.put(event.request, responseClone);
+                        });
+                    }
+                    return response;
+                })
+                .catch(() => {
+                    return caches.match(event.request);
+                })
+        );
+        return;
+    }
+
+    // For static files and assets, try cache first, fallback to network
     event.respondWith(
         caches.match(event.request)
             .then(response => {
-                // Cache hit - return response
                 if (response) {
                     return response;
                 }
-                return fetch(event.request);
+                return fetch(event.request).then(netResponse => {
+                    // Do not cache API endpoints, Firestore requests, or external service calls
+                    const url = event.request.url;
+                    if (netResponse.status === 200 && 
+                        !url.includes('/search') && 
+                        !url.includes('/add') && 
+                        !url.includes('/status') && 
+                        !url.includes('/download') && 
+                        !url.includes('/lyrics') &&
+                        !url.includes('firebase') &&
+                        url.startsWith(self.location.origin)) {
+                        const responseClone = netResponse.clone();
+                        caches.open(CACHE_NAME).then(cache => {
+                            cache.put(event.request, responseClone);
+                        });
+                    }
+                    return netResponse;
+                });
             })
     );
 });
@@ -41,6 +80,6 @@ self.addEventListener('activate', event => {
                     }
                 })
             );
-        })
+        }).then(() => self.clients.claim()) // Claim clients immediately
     );
 });
