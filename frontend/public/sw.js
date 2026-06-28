@@ -1,4 +1,4 @@
-const CACHE_NAME = 'phonix-music-cache-v2';
+const CACHE_NAME = 'phonix-music-cache-v3';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -33,8 +33,9 @@ self.addEventListener('fetch', event => {
                     }
                     return response;
                 })
-                .catch(() => {
-                    return caches.match(event.request);
+                .catch(async () => {
+                    const cache = await caches.open(CACHE_NAME);
+                    return (await cache.match('/index.html')) || (await cache.match('/'));
                 })
         );
         return;

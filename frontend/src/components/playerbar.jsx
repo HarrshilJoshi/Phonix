@@ -2,6 +2,24 @@ import React, { useEffect, useState, useRef } from 'react';
 import './playerbar.css';
 import { FaPlay, FaPause, FaStepForward, FaStepBackward, FaSyncAlt, FaRandom, FaListUl } from 'react-icons/fa';
 
+const getSafeImageUrl = (image) => {
+  if (Array.isArray(image)) {
+    const item = image[2] || image[1] || image[0];
+    return typeof item === 'object' ? item?.link : item;
+  }
+  if (typeof image === 'object' && image !== null) {
+    return image.link || "";
+  }
+  return image || "";
+};
+
+const getSafeAlbumName = (album) => {
+  if (typeof album === 'object' && album !== null) {
+    return album.name || "Unknown Album";
+  }
+  return album || "Unknown Album";
+};
+
 const Playerbar = ({
   song,
   persistentAudioRef,
@@ -196,7 +214,7 @@ useEffect(() => {
               <div className="queue-section">
                 <span className="queue-section-title">Now Playing</span>
                 <div className="queue-item active">
-                  <img src={song.image} alt="" className="qi-art" />
+                  <img src={getSafeImageUrl(song.image)} alt="" className="qi-art" />
                   <div className="qi-info">
                     <span className="qi-title">{song.title || song.name || 'Unknown Title'}</span>
                     <span className="qi-artist">{song.singers || 'Unknown Artist'}</span>
@@ -210,7 +228,7 @@ useEffect(() => {
                   <span className="queue-section-title">Next In Queue</span>
                   {queue.map((qSong, idx) => (
                     <div key={`q-${idx}`} className="queue-item">
-                      <img src={qSong.image} alt="" className="qi-art" />
+                      <img src={getSafeImageUrl(qSong.image)} alt="" className="qi-art" />
                       <div className="qi-info">
                         <span className="qi-title">{qSong.title || qSong.name || 'Unknown Title'}</span>
                         <span className="qi-artist">{qSong.singers || 'Unknown Artist'}</span>
@@ -232,7 +250,7 @@ useEffect(() => {
                   <span className="queue-section-title">Next Up</span>
                   {songs.slice(currentIndex + 1).map((upSong, idx) => (
                     <div key={`up-${idx}`} className="queue-item" style={{ cursor: 'pointer' }} onClick={() => handleMainPlay(currentIndex + 1 + idx)}>
-                      <img src={upSong.image} alt="" className="qi-art" />
+                      <img src={getSafeImageUrl(upSong.image)} alt="" className="qi-art" />
                       <div className="qi-info">
                         <span className="qi-title">{upSong.title || upSong.name || 'Unknown Title'}</span>
                         <span className="qi-artist">{upSong.singers || 'Unknown Artist'}</span>
@@ -252,9 +270,9 @@ useEffect(() => {
           <div className="song-info-bar">
             <img
               className="pb-album-art"
-              src={song.image}
+              src={getSafeImageUrl(song.image)}
               onError={(e) => (e.currentTarget.src = 'https://via.placeholder.com/60')}
-              alt={song.album}
+              alt={getSafeAlbumName(song.album)}
             />
             <div className="pb-text-info">
               <div className="pb-title">{song.title || song.name || 'Unknown Title'}</div>

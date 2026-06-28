@@ -212,6 +212,24 @@ import {
 import "./Song-card.css";
 import "./PlayLists.css";
 
+const getSafeImageUrl = (image) => {
+  if (Array.isArray(image)) {
+    const item = image[2] || image[1] || image[0];
+    return typeof item === 'object' ? item?.link : item;
+  }
+  if (typeof image === 'object' && image !== null) {
+    return image.link || "";
+  }
+  return image || "";
+};
+
+const getSafeAlbumName = (album) => {
+  if (typeof album === 'object' && album !== null) {
+    return album.name || "Unknown Album";
+  }
+  return album || "Unknown Album";
+};
+
 const SongList = ({
   songs,
   likedSongs,
@@ -305,9 +323,9 @@ const SongList = ({
           const actualIndex = startIdx + pageIndex;
           return (
             <div className="song-card" key={song.id || actualIndex}>
-              <img src={song.image} alt={song.album} className="song-image" />
+              <img src={getSafeImageUrl(song.image)} alt={getSafeAlbumName(song.album)} className="song-image" />
               <p className="song-title">{song.title || song.name || "Unknown Title"}</p>
-              <p className="song-album">{song.album || "Unknown Album"}</p>
+              <p className="song-album">{getSafeAlbumName(song.album)}</p>
               <p className="song-singer">{song.singers || "Unknown Singer"}</p>
               <p className="song-duration">
                 {Math.floor(song.duration / 60)}:
@@ -379,7 +397,7 @@ const SongList = ({
         <div className="modal-overlay" onClick={() => setShowMenuIndex(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h3>Add to Playlist</h3>
-            <p className="selected-song-name">Song: {selectedSong.title || selectedSong.album}</p>
+            <p className="selected-song-name">Song: {selectedSong.title || getSafeAlbumName(selectedSong.album)}</p>
 
             {onAddToQueue && (
               <button
