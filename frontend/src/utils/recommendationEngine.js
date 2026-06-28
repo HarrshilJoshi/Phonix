@@ -1,4 +1,4 @@
-const JIOSAAVN_API = "https://jiosaavn-api-privatecvc2.vercel.app/search/songs";
+const JIOSAAVN_API = import.meta.env.DEV ? "http://localhost:3000/search" : "https://phonix-x7de.onrender.com/search";
 
 // ─── MAIN ENTRY POINT ────────────────────────────────────────────────────────
 export const getRecommendations = async (likedSongs = [], playHistory = []) => {

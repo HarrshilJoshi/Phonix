@@ -146,7 +146,7 @@ const SearchBar = ({ onResults }) => {
     if (!query.trim()) return;
 
     // Use the exact API from your reference code (support both dev and prod)
-    const searchUrl = import.meta.env.DEV ? "http://localhost:3000/search?query=" : "/search?query=";
+    const searchUrl = import.meta.env.DEV ? "http://localhost:3000/search?query=" : "https://phonix-x7de.onrender.com/search?query=";
     const currentPage = isNextPage ? page + 1 : 1;
 
     try {
